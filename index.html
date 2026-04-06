@@ -51,7 +51,7 @@
 
 <body>
 
-<!-- ================= SIGNUP ================= -->
+<!-- SIGNUP -->
 <div id="signupPage" class="container">
   <div class="box">
     <h2>Signup</h2>
@@ -80,7 +80,7 @@
   </div>
 </div>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 <div id="loginPage" class="container hidden">
   <div class="box">
     <h2>Login</h2>
@@ -112,8 +112,7 @@ function showPage(page) {
   }
 }
 
-/* ===== EMAIL VALIDATION ===== */
-
+/* EMAIL VALIDATION */
 function validateEmail(email) {
   const allowedDomains = [
     "@gmail.com",
@@ -131,137 +130,82 @@ function validateEmail(email) {
   );
 }
 
-
-/* ===== SIGNUP ===== */
-
-
-
+/* SIGNUP */
 function handleSignup() {
-  const name = document.getElementById("signupName").value.trim();
-  const email = document.getElementById("signupEmail").value.trim();
-  const mobile = document.getElementById("signupMobile").value.trim();
-  const password = document.getElementById("signupPassword").value;
-  const confirmPassword = document.getElementById("signupConfirmPassword").value;
+  const name = signupName.value.trim();
+  const email = signupEmail.value.trim();
+  const mobile = signupMobile.value.trim();
+  const password = signupPassword.value;
+  const confirmPassword = signupConfirmPassword.value;
 
-  const nameError = document.getElementById("signupNameError");
-  const emailError = document.getElementById("signupEmailError");
-  const mobileError = document.getElementById("signupMobileError");
-  const passwordError = document.getElementById("signupPasswordError");
-  const confirmPasswordError = document.getElementById("signupConfirmPasswordError");
-  const formError = document.getElementById("signupFormError");
-
-  // Clear errors
-  nameError.innerText = "";
-  emailError.innerText = "";
-  mobileError.innerText = "";
-  passwordError.innerText = "";
-  confirmPasswordError.innerText = "";
-  formError.innerText = "";
+  signupNameError.innerText = "";
+  signupEmailError.innerText = "";
+  signupMobileError.innerText = "";
+  signupPasswordError.innerText = "";
+  signupConfirmPasswordError.innerText = "";
+  signupFormError.innerText = "";
 
   let valid = true;
 
-  // ===== NAME VALIDATION =====
-  if (!name) {
-    nameError.innerText = "Name is required";
-    valid = false;
-  } else if (name.length < 2) {
-    nameError.innerText = "Name must be at least 2 characters";
-    valid = false;
-  } else if (!/^[a-zA-Z\s]+$/.test(name)) {
-    nameError.innerText = "Only letters allowed";
+  if (!name || name.length < 2 || !/^[a-zA-Z\s]+$/.test(name)) {
+    signupNameError.innerText = "Enter valid name";
     valid = false;
   }
 
-  // ===== EMAIL VALIDATION =====
   if (!validateEmail(email)) {
-    emailError.innerText = "Enter valid email";
+    signupEmailError.innerText = "Enter valid email";
     valid = false;
   }
 
-  // ===== MOBILE VALIDATION =====
   if (!/^\d{10}$/.test(mobile)) {
-    mobileError.innerText = "Phone must be exactly 10 digits";
+    signupMobileError.innerText = "Enter valid phone";
     valid = false;
   }
 
-  // ===== PASSWORD VALIDATION (UPDATED 🔥) =====
   if (password.length < 8) {
-    passwordError.innerText = "Minimum 8 characters required";
-    valid = false;
-  } else if (!/[A-Z]/.test(password)) {
-    passwordError.innerText = "Must contain 1 uppercase letter";
-    valid = false;
-  } else if (!/[a-z]/.test(password)) {
-    passwordError.innerText = "Must contain 1 lowercase letter";
-    valid = false;
-  } else if (!/[0-9]/.test(password)) {
-    passwordError.innerText = "Must contain 1 number";
-    valid = false;
-  } else if (!/[!@#$%^&*]/.test(password)) {
-    passwordError.innerText = "Must contain 1 special character";
+    signupPasswordError.innerText = "Min 8 chars required";
     valid = false;
   }
 
-  // ===== CONFIRM PASSWORD =====
-  if (!confirmPassword) {
-    confirmPasswordError.innerText = "Confirm your password";
-    valid = false;
-  } else if (password !== confirmPassword) {
-    confirmPasswordError.innerText = "Passwords do not match";
+  if (password !== confirmPassword) {
+    signupConfirmPasswordError.innerText = "Passwords mismatch";
     valid = false;
   }
 
-  // ===== DUPLICATE CHECK =====
   const existingEmail = localStorage.getItem("storedEmail");
-  const existingPhone = localStorage.getItem("storedPhone");
-
-  if (email === existingEmail) {
-    formError.innerText = "Email already registered";
-    return;
-  }
-
-  if (mobile === existingPhone) {
-    formError.innerText = "Phone number already registered";
+  if (email.toLowerCase() === existingEmail) {
+    signupFormError.innerText = "Email already exists";
     return;
   }
 
   if (!valid) return;
 
-  // ===== SAVE DATA =====
   localStorage.setItem("storedName", name);
   localStorage.setItem("storedEmail", email.toLowerCase());
   localStorage.setItem("storedPhone", mobile);
   localStorage.setItem("storedPassword", password);
 
   alert("Signup successful!");
-
-  location.hash = "login";
   showPage("login");
 }
-
-
-
 
 function validateNameInput(input) {
   input.value = input.value.replace(/[^a-zA-Z\s]/g, '');
 }
 
-
-/* ===== LOGIN ===== */
+/* LOGIN */
 function handleLogin() {
-  const id = loginEmail.value.trim();
+  const id = loginEmail.value.trim().toLowerCase(); //  
   const pass = loginPassword.value;
 
-  loginEmailError.innerText = "";
-  loginPasswordError.innerText = "";
   loginFormError.innerText = "";
 
   const savedEmail = localStorage.getItem("storedEmail");
   const savedPhone = localStorage.getItem("storedPhone");
   const savedPassword = localStorage.getItem("storedPassword");
 
-  if (!savedPassword) {
-    loginFormError.innerText = "No account found";
+  if (!savedEmail && !savedPhone) {
+    loginFormError.innerText = "Please signup first";
     return;
   }
 
@@ -269,13 +213,13 @@ function handleLogin() {
   const phoneMatch = id === savedPhone;
 
   if ((emailMatch || phoneMatch) && pass === savedPassword) {
+    localStorage.setItem("isLoggedIn", "true"); // 
     alert("Login successful!");
-     window.location.href = "home.html"; // 🔥 redirect
+    window.location.href = "home.html";
   } else {
     loginFormError.innerText = "Invalid credentials";
   }
 }
-
 </script>
 
 </body>
