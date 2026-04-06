@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Auth</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f2f2f2;
+      margin: 0;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      width: 300px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .error {
+      color: red;
+      font-size: 12px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ================= SIGNUP ================= -->
+<div id="signupPage" class="container">
+  <div class="box">
+    <h2>Signup</h2>
+
+    <input type="text" id="signupName" placeholder="Name" oninput="validateNameInput(this)">
+    <div id="signupNameError" class="error"></div>
+
+    <input type="email" id="signupEmail" placeholder="Email">
+    <div id="signupEmailError" class="error"></div>
+
+    <input type="text" id="signupMobile" placeholder="Mobile number">
+    <div id="signupMobileError" class="error"></div>
+
+    <input type="password" id="signupPassword" placeholder="Password">
+    <div id="signupPasswordError" class="error"></div>
+
+    <input type="password" id="signupConfirmPassword" placeholder="Confirm Password">
+    <div id="signupConfirmPasswordError" class="error"></div>
+
+    <button onclick="handleSignup()">Signup</button>
+    <div id="signupFormError" class="error"></div>
+
+    <p>Already have an account?
+      <a href="#login" onclick="showPage('login')">Login</a>
+    </p>
+  </div>
+</div>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginPage" class="container hidden">
+  <div class="box">
+    <h2>Login</h2>
+
+    <input type="text" id="loginEmail" placeholder="Email or Mobile">
+    <div id="loginEmailError" class="error"></div>
+
+    <input type="password" id="loginPassword" placeholder="Password">
+    <div id="loginPasswordError" class="error"></div>
+
+    <button onclick="handleLogin()">Login</button>
+    <div id="loginFormError" class="error"></div>
+
+    <p>Don't have an account?
+      <a href="#signup" onclick="showPage('signup')">Signup</a>
+    </p>
+  </div>
+</div>
+
+<script>
+function showPage(page) {
+  document.getElementById("signupPage").classList.add("hidden");
+  document.getElementById("loginPage").classList.add("hidden");
+
+  if (page === "signup") {
+    document.getElementById("signupPage").classList.remove("hidden");
+  } else {
+    document.getElementById("loginPage").classList.remove("hidden");
+  }
+}
+
+/* ===== EMAIL VALIDATION ===== */
+
+function validateEmail(email) {
+  const allowedDomains = [
+    "@gmail.com",
+    "@yahoo.com",
+    "@yahoo.in",
+    "@outlook.com",
+    "@thestackly.com",
+  ];
+
+  const basicCheck = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!basicCheck.test(email)) return false;
+
+  return allowedDomains.some(domain =>
+    email.toLowerCase().endsWith(domain)
+  );
+}
+
+
+/* ===== SIGNUP ===== */
+
+
+
+function handleSignup() {
+  const name = document.getElementById("signupName").value.trim();
+  const email = document.getElementById("signupEmail").value.trim();
+  const mobile = document.getElementById("signupMobile").value.trim();
+  const password = document.getElementById("signupPassword").value;
+  const confirmPassword = document.getElementById("signupConfirmPassword").value;
+
+  const nameError = document.getElementById("signupNameError");
+  const emailError = document.getElementById("signupEmailError");
+  const mobileError = document.getElementById("signupMobileError");
+  const passwordError = document.getElementById("signupPasswordError");
+  const confirmPasswordError = document.getElementById("signupConfirmPasswordError");
+  const formError = document.getElementById("signupFormError");
+
+  // Clear errors
+  nameError.innerText = "";
+  emailError.innerText = "";
+  mobileError.innerText = "";
+  passwordError.innerText = "";
+  confirmPasswordError.innerText = "";
+  formError.innerText = "";
+
+  let valid = true;
+
+  // ===== NAME VALIDATION =====
+  if (!name) {
+    nameError.innerText = "Name is required";
+    valid = false;
+  } else if (name.length < 2) {
+    nameError.innerText = "Name must be at least 2 characters";
+    valid = false;
+  } else if (!/^[a-zA-Z\s]+$/.test(name)) {
+    nameError.innerText = "Only letters allowed";
+    valid = false;
+  }
+
+  // ===== EMAIL VALIDATION =====
+  if (!validateEmail(email)) {
+    emailError.innerText = "Enter valid email";
+    valid = false;
+  }
+
+  // ===== MOBILE VALIDATION =====
+  if (!/^\d{10}$/.test(mobile)) {
+    mobileError.innerText = "Phone must be exactly 10 digits";
+    valid = false;
+  }
+
+  // ===== PASSWORD VALIDATION (UPDATED 🔥) =====
+  if (password.length < 8) {
+    passwordError.innerText = "Minimum 8 characters required";
+    valid = false;
+  } else if (!/[A-Z]/.test(password)) {
+    passwordError.innerText = "Must contain 1 uppercase letter";
+    valid = false;
+  } else if (!/[a-z]/.test(password)) {
+    passwordError.innerText = "Must contain 1 lowercase letter";
+    valid = false;
+  } else if (!/[0-9]/.test(password)) {
+    passwordError.innerText = "Must contain 1 number";
+    valid = false;
+  } else if (!/[!@#$%^&*]/.test(password)) {
+    passwordError.innerText = "Must contain 1 special character";
+    valid = false;
+  }
+
+  // ===== CONFIRM PASSWORD =====
+  if (!confirmPassword) {
+    confirmPasswordError.innerText = "Confirm your password";
+    valid = false;
+  } else if (password !== confirmPassword) {
+    confirmPasswordError.innerText = "Passwords do not match";
+    valid = false;
+  }
+
+  // ===== DUPLICATE CHECK =====
+  const existingEmail = localStorage.getItem("storedEmail");
+  const existingPhone = localStorage.getItem("storedPhone");
+
+  if (email === existingEmail) {
+    formError.innerText = "Email already registered";
+    return;
+  }
+
+  if (mobile === existingPhone) {
+    formError.innerText = "Phone number already registered";
+    return;
+  }
+
+  if (!valid) return;
+
+  // ===== SAVE DATA =====
+  localStorage.setItem("storedName", name);
+  localStorage.setItem("storedEmail", email.toLowerCase());
+  localStorage.setItem("storedPhone", mobile);
+  localStorage.setItem("storedPassword", password);
+
+  alert("Signup successful!");
+
+  location.hash = "login";
+  showPage("login");
+}
+
+
+
+
+function validateNameInput(input) {
+  input.value = input.value.replace(/[^a-zA-Z\s]/g, '');
+}
+
+
+/* ===== LOGIN ===== */
+function handleLogin() {
+  const id = loginEmail.value.trim();
+  const pass = loginPassword.value;
+
+  loginEmailError.innerText = "";
+  loginPasswordError.innerText = "";
+  loginFormError.innerText = "";
+
+  const savedEmail = localStorage.getItem("storedEmail");
+  const savedPhone = localStorage.getItem("storedPhone");
+  const savedPassword = localStorage.getItem("storedPassword");
+
+  if (!savedPassword) {
+    loginFormError.innerText = "No account found";
+    return;
+  }
+
+  const emailMatch = id === savedEmail;
+  const phoneMatch = id === savedPhone;
+
+  if ((emailMatch || phoneMatch) && pass === savedPassword) {
+    alert("Login successful!");
+     window.location.href = "home.html"; // 🔥 redirect
+  } else {
+    loginFormError.innerText = "Invalid credentials";
+  }
+}
+
+</script>
+
+</body>
+</html>
