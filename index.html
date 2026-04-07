@@ -134,7 +134,7 @@ function validateEmail(email) {
 
 /* PASSWORD VALIDATION */
 function validatePassword(password) {
-  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
   return regex.test(password);
 }
 
@@ -200,7 +200,7 @@ function handleSignup() {
 
   if (!validatePassword(password)) {
     signupPasswordError.innerText =
-      "Min 8 chars, include uppercase, lowercase & special symbol";
+      "Min 8 chars, include uppercase, lowercase, number & special symbol";
     return;
   }
 
