@@ -62,7 +62,9 @@
     <input type="email" id="signupEmail" placeholder="Email">
     <div id="signupEmailError" class="error"></div>
 
-    <input type="text" id="signupMobile" placeholder="Mobile number">
+    <input type="text" id="signupMobile" placeholder="Mobile number"
+       maxlength="10"
+       oninput="validateMobileInput(this)">
     <div id="signupMobileError" class="error"></div>
 
     <input type="password" id="signupPassword" placeholder="Password">
@@ -130,97 +132,142 @@ function validateEmail(email) {
   );
 }
 
+/* PASSWORD VALIDATION */
+function validatePassword(password) {
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}$/;
+  return regex.test(password);
+}
+
+/* MOBILE INPUT VALIDATION */
+function validateMobileInput(input) {
+  input.value = input.value.replace(/\D/g, "");
+
+  if (input.value.length > 10) {
+    input.value = input.value.slice(0, 10);
+  }
+}
+
 /* SIGNUP */
 function handleSignup() {
   const name = signupName.value.trim();
-  const email = signupEmail.value.trim();
+  const email = signupEmail.value.trim().toLowerCase();
   const mobile = signupMobile.value.trim();
   const password = signupPassword.value;
   const confirmPassword = signupConfirmPassword.value;
 
+  // CLEAR ALL ERRORS
+  signupFormError.innerText = "";
   signupNameError.innerText = "";
   signupEmailError.innerText = "";
   signupMobileError.innerText = "";
   signupPasswordError.innerText = "";
   signupConfirmPasswordError.innerText = "";
-  signupFormError.innerText = "";
 
-  let valid = true;
-
-  if (!name || name.length < 2 || !/^[a-zA-Z\s]+$/.test(name)) {
-    signupNameError.innerText = "Enter valid name";
-    valid = false;
-  }
-
-  if (!validateEmail(email)) {
-    signupEmailError.innerText = "Enter valid email";
-    valid = false;
-  }
-
-  if (!/^\d{10}$/.test(mobile)) {
-    signupMobileError.innerText = "Enter valid phone";
-    valid = false;
-  }
-
-  if (password.length < 8) {
-    signupPasswordError.innerText = "Min 8 chars required";
-    valid = false;
-  }
-
-  if (password !== confirmPassword) {
-    signupConfirmPasswordError.innerText = "Passwords mismatch";
-    valid = false;
-  }
-
-  const existingEmail = localStorage.getItem("storedEmail");
-  if (email.toLowerCase() === existingEmail) {
-    signupFormError.innerText = "Email already exists";
+  /* NAME */
+  if (!name) {
+    signupNameError.innerText = "Name is required";
     return;
   }
 
-  if (!valid) return;
+  /* EMAIL */
+  if (!email) {
+    signupEmailError.innerText = "Email is required";
+    return;
+  }
 
-  localStorage.setItem("storedName", name);
-  localStorage.setItem("storedEmail", email.toLowerCase());
-  localStorage.setItem("storedPhone", mobile);
-  localStorage.setItem("storedPassword", password);
+  if (!validateEmail(email)) {
+    signupEmailError.innerText =
+      "Only gmail, yahoo, outlook, thestackly emails are allowed";
+    return;
+  }
+
+  /* MOBILE */
+  if (!mobile) {
+    signupMobileError.innerText = "Mobile number is required";
+    return;
+  }
+
+  if (!/^\d{10}$/.test(mobile)) {
+    signupMobileError.innerText = "Mobile must be exactly 10 digits";
+    return;
+  }
+
+  /* PASSWORD */
+  if (!password) {
+    signupPasswordError.innerText = "Password is required";
+    return;
+  }
+
+  if (!validatePassword(password)) {
+    signupPasswordError.innerText =
+      "Min 8 chars, include uppercase, lowercase & special symbol";
+    return;
+  }
+
+  /* CONFIRM PASSWORD */
+  if (!confirmPassword) {
+    signupConfirmPasswordError.innerText = "Confirm your password";
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    signupConfirmPasswordError.innerText = "Passwords do not match";
+    return;
+  }
+
+  /* MULTIPLE USERS */
+  let users = JSON.parse(localStorage.getItem("users")) || [];
+
+  const exists = users.some(u => u.email === email || u.mobile === mobile);
+  if (exists) {
+    signupFormError.innerText = "User already exists";
+    return;
+  }
+
+  let user = {
+    name,
+    email,
+    mobile,
+    password
+  };
+
+  users.push(user);
+  localStorage.setItem("users", JSON.stringify(users));
 
   alert("Signup successful!");
   showPage("login");
 }
 
-function validateNameInput(input) {
-  input.value = input.value.replace(/[^a-zA-Z\s]/g, '');
-}
-
 /* LOGIN */
 function handleLogin() {
-  const id = loginEmail.value.trim().toLowerCase(); //  
+  const id = loginEmail.value.trim().toLowerCase();
   const pass = loginPassword.value;
 
-  loginFormError.innerText = "";
+  const users = JSON.parse(localStorage.getItem("users")) || [];
 
-  const savedEmail = localStorage.getItem("storedEmail");
-  const savedPhone = localStorage.getItem("storedPhone");
-  const savedPassword = localStorage.getItem("storedPassword");
-
-  if (!savedEmail && !savedPhone) {
+  if (users.length === 0) {
     loginFormError.innerText = "Please signup first";
     return;
   }
 
-  const emailMatch = id === savedEmail;
-  const phoneMatch = id === savedPhone;
+  const foundUser = users.find(u =>
+    (u.email === id || u.mobile === id) && u.password === pass
+  );
 
-  if ((emailMatch || phoneMatch) && pass === savedPassword) {
-    localStorage.setItem("isLoggedIn", "true"); // 
-    alert("Login successful!");
+    if (foundUser) {
+  localStorage.setItem("isLoggedIn", "true");
+
+  // ADDED THIS LINE FOR CURRENT USER 
+  localStorage.setItem("currentUser", JSON.stringify(foundUser));
+
+  alert("Login successful!");
     window.location.href = "home.html";
   } else {
     loginFormError.innerText = "Invalid credentials";
   }
 }
 </script>
+
 
 </body>
 </html>
