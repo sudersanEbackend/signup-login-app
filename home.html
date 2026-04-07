@@ -139,23 +139,25 @@
 </div>
 
 <script>
-/* 🔐 AUTH CHECK */
+/*  AUTH CHECK */
 const isLoggedIn = localStorage.getItem("isLoggedIn");
-const userName = localStorage.getItem("storedName");
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
 if (isLoggedIn !== "true") {
   alert("Please login first");
   window.location.href = "index.html#login";
 }
 
-/* 👤 Show username */
-if (userName) {
-  document.getElementById("welcomeText").innerText = "Welcome " + userName + " 👋";
+/*  Show username (FIXED) */
+if (currentUser && currentUser.name) {
+  document.getElementById("welcomeText").innerText =
+    "Welcome " + currentUser.name + " 👋";
 }
 
-/* 🚪 LOGOUT */
+/*  LOGOUT */
 function logout() {
   localStorage.removeItem("isLoggedIn");
+  localStorage.removeItem("currentUser"); //
   window.location.href = "index.html#login";
 }
 </script>
